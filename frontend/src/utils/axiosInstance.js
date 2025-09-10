@@ -2,20 +2,19 @@ import axios from "axios";
 import { getToken } from "./authHelper";
 
 const axiosInstance = axios.create({
-  baseURL: "https://pryme-backend-2khs.onrender.com", 
-  withCredentials: true,// adjust to your backend URL
+  baseURL: "https://pryme-backend-2khs.onrender.com/api", // add /api
+  withCredentials: true, // only needed if using cookies
 });
 
-// Add the Authorization header if token exists
 axiosInstance.interceptors.request.use(
- (config) => {
+  (config) => {
     const token = getToken();
-  if (token) {
-   config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
-   },
+  },
   (error) => Promise.reject(error)
- );
+);
 
 export default axiosInstance;
