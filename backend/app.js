@@ -1,97 +1,69 @@
-// app.js
 const express = require("express");
 const path = require("path");
 const http = require("http");
-const { Server } = require("socket.io");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
-const socketHandler = require("./socket/socket.js");
+const socketHandler = require("./socket/socket.js"); // Your socket logic
 
 // Load environment variables
 require("dotenv").config();
-
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
+// Validate Mongo URI
 if (!MONGO_URI) {
-  console.error("❌ MONGO_URI is not defined! Set it in Render environment variables.");
+  console.error("❌ MONGO_URI not defined! Set it in Render environment variables.");
   process.exit(1);
 }
+
+// Connect to MongoDB
+mongoose
+  .connect(MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
 
 // Initialize Express
 const app = express();
 
 // Middleware
-app.use(
-  cors({
-    origin: "https://pryme-backend-2khs.onrender.com", // your frontend URL
-    credentials: true,
-  })
-);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// -------------------
 // API Routes
-// -------------------
-const authRoutes = require("./routes/userRoutes");
-const adminRoutes = require("./routes/adminRoutes");
-const serviceRoutes = require("./routes/serviceRoutes");
-const notificationRoutes = require("./routes/notificationRoute");
-const bookingRoutes = require("./routes/bookingRoute");
-const timesheetRoutes = require("./routes/timeRoutes.js");
-const reviewRoutes = require("./routes/reviewRoutes.js");
+app.use("/api/auth", require("./routes/userRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
+app.use("/api/services", require("./routes/serviceRoutes"));
+app.use("/api/notifications", require("./routes/notificationRoute"));
+app.use("/api/bookings", require("./routes/bookingRoute"));
+app.use("/api/timesheets", require("./routes/timeRoutes"));
+app.use("/api/reviews", require("./routes/reviewRoutes"));
 
-app.use("/api/auth", authRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/services", serviceRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/timesheets", timesheetRoutes);
-app.use("/api/reviews", reviewRoutes);
+// Serve frontend (React/Vite) build in production
+const frontendPath = path.join(__dirname, "../frontend/dist");
+app.use(express.static(frontendPath));
 
-// -------------------
-// Serve frontend build
-// -------------------
-app.use(express.static(path.join(__dirname, "dist")));
+// All other requests serve index.html
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// -------------------
-// Create HTTP server and Socket.IO
-// -------------------
+// Create HTTP server & bind Socket.io
 const server = http.createServer(app);
+const { Server } = require("socket.io");
 const io = new Server(server, {
-  cors: {
-    origin: "https://pryme-backend-2khs.onrender.com",
-    credentials: true,
-  },
+  cors: { origin: true, credentials: true },
 });
-
 app.set("io", io);
 socketHandler(io);
 
-// -------------------
-// Connect to MongoDB
-// -------------------
-const connectDB = async () => {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log("✅ MongoDB Connected");
-  } catch (err) {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1);
-  }
-};
-
-// -------------------
 // Start server
-// -------------------
 server.listen(PORT, () => {
-  console.log(`🚀 Server is listening on port ${PORT}`);
-  connectDB();
+  console.log(`🚀 Server running on port ${PORT}`);
 });
