@@ -15,7 +15,7 @@ export const getToken = () => {
   return localStorage.getItem("token");
 };
 
-// Remove both
+// Remove both token and user
 export const removeToken = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
