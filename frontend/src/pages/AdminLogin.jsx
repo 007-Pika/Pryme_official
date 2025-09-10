@@ -25,11 +25,11 @@ const AdminLogin = () => {
         password,
       });
 
-      const { admin } = response.data;
+      const { admin, token } = response.data; // <-- must come from backend
       dispatch(setAdmin(admin));
+      saveToken(token, admin); // <-- save token for future requests
 
       enqueueSnackbar("Admin login successful!", { variant: "success" });
-      console.log("Navigating to admin dashboard...");
       navigate("/admin/dashboard", { replace: true });
     } catch (error) {
       console.error(error);
