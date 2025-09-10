@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "./authHelper";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:9700/api", 
+  baseURL: "https://pryme-backend-2khs.onrender.com", 
   withCredentials: true,// adjust to your backend URL
 });
 
