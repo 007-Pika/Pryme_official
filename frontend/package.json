@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://amaan325.github.io/Pryme",
+  "homepage": "https://007-Pika/Pryme_official",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
