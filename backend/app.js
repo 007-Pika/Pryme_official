@@ -1,3 +1,4 @@
+// Load environment variables
 require("dotenv").config();
 
 const express = require("express");
@@ -24,20 +25,20 @@ mongoose.connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => {
     console.error("❌ MongoDB connection error:", err);
-    process.exit(1); // Exit if DB fails
+    process.exit(1);
   });
 
 // Initialize Express
 const app = express();
 
 // Middleware
-app.use(cors({ credentials: true, origin: "*" })); // allow all origins for now
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(cors({ credentials: true, origin: "*" })); // allow all origins
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParserMiddleware());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Routes
+// API Routes
 app.use("/api/auth", require("./routes/userRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/services", require("./routes/serviceRoutes"));
@@ -46,16 +47,22 @@ app.use("/api/bookings", require("./routes/bookingRoute"));
 app.use("/api/timesheets", require("./routes/timeRoutes.js"));
 app.use("/api/reviews", require("./routes/reviewRoutes.js"));
 
-// Create HTTP server + Socket.IO
+// Serve frontend build (Vite)
+app.use(express.static(path.join(__dirname, "dist")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
+// Create HTTP server and Socket.IO
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // change to frontend URL later
+    origin: "*",
     credentials: true,
   },
 });
 
-// Attach socket
+// Attach socket instance
 app.set("io", io);
 socketHandler(io);
 
