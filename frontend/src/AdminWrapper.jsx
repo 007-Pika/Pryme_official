@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import axios from "./utils/axiosInstance";
-import { setAdmin, logoutAdmin } from "./features/admin/adminSlice";
+import axios from "../utils/axiosInstance";
+import { setAdmin, logoutAdmin } from "../features/admin/adminSlice";
 
 const AdminWrapper = ({ children }) => {
   const dispatch = useDispatch();
@@ -10,7 +10,7 @@ const AdminWrapper = ({ children }) => {
   useEffect(() => {
     const checkAdminAuth = async () => {
       try {
-        const { data } = await axios.get("/admin/me", { withCredentials: true });
+        const { data } = await axios.get("/admin/me"); // token attached automatically
         dispatch(setAdmin(data.admin));
       } catch (error) {
         dispatch(logoutAdmin());
@@ -22,7 +22,7 @@ const AdminWrapper = ({ children }) => {
     checkAdminAuth();
   }, [dispatch]);
 
-  if (loading) return <div>Loading...</div>; // or spinner
+  if (loading) return <div>Loading...</div>;
 
   return children;
 };
