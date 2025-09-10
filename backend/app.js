@@ -10,6 +10,23 @@ const socketHandler = require("./socket/socket.js"); // <- your socket setup fil
 // Load environment variables
 require("dotenv").config();
 const port = process.env.PORT || 3000;
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error(" MONGO_URI is not defined! Please set it in Render environment variables.");
+  process.exit(1);
+}
+
+// connect oi db bhAI 
+  mongoose.connect(MONGO_URI)
+.then(() => console.log("MongoDB Connected"))
+  .catch(err => console.error("MongoDB connection error:", err);
+
+ console.error("❌ MongoDB connection error:", err);
+    process.exit(1)
+});
+
+
 
 // Initialize Express
 const app = express();
